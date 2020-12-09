@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>地图射线</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    body {
+      background-color: #1f2121;
+    }
+    .canvasBox {
+      width: 100vw;
+      height: 100vh;
+      margin: 0 auto;
+      overflow: hidden;
+      position: relative;
+      left: 0;
+      top: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 1px 0 #fff;
+    }
+    canvas {
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: block;
+      box-sizing: border-box;
+      transform-origin: top left;
+    }
+    canvas:nth-child(1) {
+      z-index: 1;
+    }
+    canvas:nth-child(2) {
+      z-index: 2;
+    }
+    canvas:nth-child(3) {
+      z-index: 3;
+    }
+  </style>
+</head>
+<body>
+  <div class="canvasBox"></div>
+</body>
+<script src="./Draw.js"></script>
+<script>
+  const Draw = window.Draw
+
+  start()
+
+  async function start() {
+    let draw = null
+    draw = await new Draw({
+      dom: document.querySelector('.canvasBox'),
+      imgUrl: './map.png', // 可选
+    })
+
+    function getRandomNum() {
+      return parseInt(Math.random() * 100)
+    }
+
+    draw.sendLine([1.6, 1.6], [98.4, 98.4])
+
+    // setInterval(() => {
+    //   draw.sendLine([getRandomNum(), getRandomNum()], [getRandomNum(), getRandomNum()])
+    // }, 100);
+  }
+</script>
+</html>
