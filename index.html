@@ -11,11 +11,16 @@
     }
     body {
       background-color: #1f2121;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100vw;
+      height: 100vh;
     }
     .canvasBox {
       width: 100vw;
-      height: 100vh;
-      margin: 0 auto;
+      height: 90vh;
+      /* margin: 0 auto; */
       overflow: hidden;
       position: relative;
       left: 0;
@@ -58,17 +63,35 @@
     draw = await new Draw({
       dom: document.querySelector('.canvasBox'),
       imgUrl: './map.png', // 可选
+      // flashRadiusFrom: 10, // 发出时闪烁的圆圈的半径
+      flashRadiusTo: 50, // 落地时闪烁的圆圈的半径
+      // flashSpeed: 0.3, // 闪烁的圆圈的闪烁速度
+      // flashColorFrom: 'rgba(114,187,214,1)', // 闪烁的圆圈的颜色——from
+      // flashColorTo: '#f00', // 闪烁的圆圈的颜色——to
+      // lineColor: '#f00', // 射出的线的颜色
+      // lineWidth: 1.5, // 射出的线的宽度
+      // lineSpeed: 0.5, // 射出的线的速度
     })
 
-    function getRandomNum() {
-      return parseInt(Math.random() * 100)
+    // 开始定时发射小球
+    setInterval(() => {
+      draw.sendLine(
+        [getRandomNum(draw.radiiFrom), getRandomNum(draw.radiiFrom)],
+        [getRandomNum(draw.radiiTo), getRandomNum(draw.radiiTo)]
+      )
+    }, 500)
+
+    /**
+     * 获取一个点
+     * @param {Number} space 这个点距离0和100的距离
+     */
+     function getRandomNum(space) {
+      let point = parseInt(Math.random() * 100)
+      do {
+        point = parseInt(Math.random() * 100)
+      } while (point < space || (100 - point <= space))
+      return point
     }
-
-    draw.sendLine([1.6, 1.6], [98.4, 98.4])
-
-    // setInterval(() => {
-    //   draw.sendLine([getRandomNum(), getRandomNum()], [getRandomNum(), getRandomNum()])
-    // }, 100);
   }
 </script>
 </html>

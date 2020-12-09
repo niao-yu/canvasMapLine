@@ -8,6 +8,10 @@
       this.configs.flashRadiusFrom = this.configs.flashRadiusFrom * this.canvas.scale_line
       this.configs.flashRadiusTo = this.configs.flashRadiusTo * this.canvas.scale_line
       this.configs.lineWidth = this.configs.lineWidth * this.canvas.scale_line
+      // 设置发射点的半径
+      this.radiiFrom = this.configs.flashRadiusFrom / 10
+      this.radiiTo = this.configs.flashRadiusTo / 10
+      
       return new Promise((resolve, reject) => {
         // 初始化图片和canvas
         this.initDom(imgUrl).then(imgDom => {
@@ -25,6 +29,8 @@
     drawDocId = 1 // 射线id累计
     exchangesArc = [] // 每次绘制时, 需要绘制的闪烁们
     handleArr = [] // 每次绘制时, 需要绘制的射线们
+    radiiFrom= 0 // 发射点的半径
+    radiiTo = 0 // 发射点的半径
     // 生成的 canvas 的信息
     canvas = {
       ctx: null,
@@ -42,10 +48,11 @@
     }
   
     configs = {
-      flashRadiusFrom: 16, // 发出时闪烁的圆圈的半径
-      flashRadiusTo: 16, // 落地时闪烁的圆圈的半径
-      flashSpeed: 0.7, // 闪烁的圆圈的闪烁速度
+      flashRadiusFrom: 10, // 发出时闪烁的圆圈的半径
+      flashRadiusTo: 30, // 落地时闪烁的圆圈的半径
+      flashSpeed: 0.3, // 闪烁的圆圈的闪烁速度
       flashColorFrom: 'rgba(114,187,214,1)', // 闪烁的圆圈的颜色——from
+      flashColorTo: 'rgba(114,187,214,1)', // 闪烁的圆圈的颜色——to
       lineColor: 'rgba(114,187,214,1)', // 射出的线的颜色
       lineWidth: 1.5, // 射出的线的宽度
       lineSpeed: 0.5, // 射出的线的速度
@@ -58,7 +65,9 @@
         // 发射之前先闪烁一下
         let fromReal_x = fromPosition[0] * this.canvas.width_circle
         let fromReal_y = fromPosition[1] * this.canvas.height_circle
-        this.exchangesArc.push(this.getOneArc({x: fromReal_x, y: fromReal_y, r: this.configs.flashRadiusFrom}))
+        const { flashRadiusFrom, flashRadiusTo, flashColorFrom, flashColorTo } = this.configs
+        // 发射
+        this.exchangesArc.push(this.getOneArc({x: fromReal_x, y: fromReal_y, r: flashRadiusFrom, color: flashColorFrom}))
         let oneLine = this.oneHandle({
           start_x: fromPosition[0],
           start_y: fromPosition[1],
@@ -68,7 +77,7 @@
             let _x = toPosition[0] * this.canvas.width_circle
             let _y = toPosition[1] * this.canvas.height_circle
             // 终点闪烁一下
-            this.exchangesArc.push(this.getOneArc({x: _x, y: _y}))
+            this.exchangesArc.push(this.getOneArc({x: _x, y: _y, r: flashRadiusTo, color: flashColorTo}))
           },
         })
         this.handleArr.push(oneLine)
@@ -107,7 +116,7 @@
     }
   
     // 获取一个闪烁圈对象
-    getOneArc({x, y, r}) {
+    getOneArc({x, y, r, color}) {
       let _this = this
       return {
         startNumber: _this.drawNumber,
@@ -121,7 +130,7 @@
           if (!exchangesArcObj._id) exchangesArcObj._id = _this.drawDocId++ // 配置id
           let _r = exchangesArcObj.flag++ * _this.configs.flashSpeed
           // 判断是否完成
-          if (_r >= (r ? r : _this.configs.flashRadiusTo)) {
+          if (_r >= r) {
             for (let i = 0; i < _this.exchangesArc.length; i++) {
               if (_this.exchangesArc[i]._id === exchangesArcObj._id) {
                 _this.exchangesArc.splice(i, 1)
@@ -130,18 +139,18 @@
             }
             return
           }
-          _this.drawArc({x: exchangesArcObj.position.x, y: exchangesArcObj.position.y}, _r)
+          _this.drawArc({x: exchangesArcObj.position.x, y: exchangesArcObj.position.y}, _r, color)
         },
       }
     }
   
     // 绘制圆 - 扩圈
-    drawArc({x, y}, r) {
+    drawArc({x, y}, r, color) {
       // 绘制圆，从起点到终点
       const ctx_line = this.canvas.ctx_line
       ctx_line.moveTo(x, y);
       ctx_line.beginPath();
-      ctx_line.strokeStyle = this.configs.flashColorFrom
+      ctx_line.strokeStyle = color
       ctx_line.arc(x, y, r, 0 * Math.PI / 180, 360 * Math.PI / 180)
       ctx_line.stroke();
       ctx_line.closePath();
